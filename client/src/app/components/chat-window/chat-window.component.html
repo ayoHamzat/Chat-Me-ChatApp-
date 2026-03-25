@@ -1,0 +1,74 @@
+@if(chatService.currentOpenedChat())
+{
+<div class="flex flex-col w-full bg-zinc-950 h-full">
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b border-amber-500/20 w-full bg-gray-900/95 backdrop-blur px-4 py-3 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <img [src]="chatService.currentOpenedChat()?.profilePicture"
+                    class="h-9 w-9 rounded-full object-cover ring-2 ring-amber-400/50" alt="avatar" />
+                @if(chatService.currentOpenedChat()?.isOnline) {
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-amber-400 rounded-full ring-2 ring-gray-900 online-glow"></span>
+                }
+            </div>
+            <div>
+                <span class="font-semibold text-white text-sm leading-tight block">
+                    {{chatService.currentOpenedChat()?.fullName | titlecase}}
+                </span>
+                <span class="text-zinc-400 text-xs">
+                    {{chatService.status(chatService.currentOpenedChat()?.userName!)}}
+                </span>
+            </div>
+        </div>
+        <button class="text-amber-400 hover:text-amber-300 transition-all hover:scale-110 transform duration-150"
+            (click)="displayDialog(chatService.currentOpenedChat()!.id)">
+            <mat-icon>video_call</mat-icon>
+        </button>
+    </div>
+
+    <!-- Messages -->
+    <div class="flex-1 overflow-hidden">
+        <app-chat-box />
+    </div>
+
+    <!-- Input Bar -->
+    <div class="flex items-center gap-2 border-t border-amber-500/20 w-full bg-gray-900/95 backdrop-blur px-4 py-3 flex-shrink-0">
+        <!-- Emoji Picker -->
+        <div class="relative flex-shrink-0">
+            <button (click)="toggleEmojiPicker()"
+                class="text-zinc-400 hover:text-amber-400 transition-colors p-1 rounded-full hover:bg-zinc-800 flex items-center justify-center">
+                <mat-icon style="font-size:20px;width:20px;height:20px;line-height:20px">emoji_emotions</mat-icon>
+            </button>
+            @if(showEmojiPicker()) {
+            <div class="absolute bottom-12 left-0 bg-zinc-900 border border-zinc-700/80 rounded-2xl p-3 shadow-2xl w-72 z-50 fade-up">
+                <div class="grid grid-cols-9 gap-0.5 max-h-44 overflow-y-auto">
+                    @for(emoji of emojis; track emoji) {
+                    <button (click)="insertEmoji(emoji)"
+                        class="text-lg p-1.5 rounded-lg hover:bg-zinc-700 transition-colors leading-none cursor-pointer">
+                        {{emoji}}
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+
+        <input type="text"
+            (input)="chatService.notifyTyping()"
+            (keydown.enter)="sendMessage()"
+            [(ngModel)]="message"
+            class="flex-1 bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-400/60 text-white border border-zinc-700 rounded-full px-5 py-2 text-sm placeholder-zinc-500 transition-all"
+            placeholder="Type a message..." />
+
+        <button (click)="sendMessage()"
+            class="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-400 transition-all transform hover:scale-110 active:scale-95 shadow-lg text-zinc-900 cursor-pointer">
+            <mat-icon style="font-size:18px;width:18px;height:18px;line-height:18px">send</mat-icon>
+        </button>
+    </div>
+</div>
+}@else {
+<div class="flex flex-col items-center justify-center p-4 md:h-full bg-zinc-950 gap-3 fade-up">
+    <img src="chatopen.svg" class="opacity-20 max-w-48" />
+    <p class="text-zinc-500 text-sm">Select a conversation to start chatting</p>
+</div>
+}

@@ -1,0 +1,64 @@
+/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+app-root     { display: block; height: 100%; }
+app-chat     { display: block; height: 100%; }
+app-chat-box { display: block; height: 100%; }
+app-login    { display: block; height: 100%; }
+app-register { display: block; height: 100%; }
+
+/* ===== Chat App Animations ===== */
+@keyframes msgSlideLeft {
+  from { transform: translateX(-14px) scale(0.97); opacity: 0; }
+  to   { transform: translateX(0)     scale(1);    opacity: 1; }
+}
+@keyframes msgSlideRight {
+  from { transform: translateX(14px)  scale(0.97); opacity: 0; }
+  to   { transform: translateX(0)     scale(1);    opacity: 1; }
+}
+@keyframes fadeUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes cardIn {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes bounceDot {
+  0%, 80%, 100% { transform: translateY(0);   opacity: 0.5; }
+  40%           { transform: translateY(-6px); opacity: 1;   }
+}
+@keyframes glowPulse {
+  0%,  100% { box-shadow: 0 0 0 0   rgba(251,191,36,0.7); }
+  50%       { box-shadow: 0 0 0 6px rgba(251,191,36,0);   }
+}
+
+.msg-in      { animation: msgSlideLeft  0.22s ease-out both; }
+.msg-out     { animation: msgSlideRight 0.22s ease-out both; }
+.fade-up     { animation: fadeUp        0.2s  ease-out both; }
+.card-in     { animation: cardIn        0.38s cubic-bezier(0.34,1.56,0.64,1) both; }
+.bounce-1    { animation: bounceDot 1.3s ease-in-out infinite 0.00s; }
+.bounce-2    { animation: bounceDot 1.3s ease-in-out infinite 0.15s; }
+.bounce-3    { animation: bounceDot 1.3s ease-in-out infinite 0.30s; }
+.online-glow { animation: glowPulse 2.2s ease-in-out infinite; }
+
+/* Dark-theme Material form fields on login/register */
+.mat-mdc-form-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: #27272a !important; /* zinc-800 */
+}
+.mat-mdc-form-field .mdc-text-field--filled .mdc-floating-label,
+.mat-mdc-form-field .mdc-text-field--filled label {
+  color: #a1a1aa !important; /* zinc-400 */
+}
+.mat-mdc-form-field input.mat-mdc-input-element {
+  color: #ffffff !important;
+}
+.mat-mdc-form-field .mdc-line-ripple::before {
+  border-bottom-color: #52525b !important; /* zinc-600 */
+}
+.mat-mdc-form-field .mdc-line-ripple::after {
+  border-bottom-color: #f59e0b !important; /* amber-500 */
+}

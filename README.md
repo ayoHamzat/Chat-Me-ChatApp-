@@ -1,6 +1,7 @@
 CSCI 412: Senior Seminar
 Project Proposal
 Ayoyemi F.Hamzat
+
 Project Title
 Chat-Me: A Real-Time Messaging and Video Chat Web Application
 Problem Description and Motivation

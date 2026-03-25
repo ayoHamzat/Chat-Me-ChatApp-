@@ -1,0 +1,21 @@
+<button (click)="clickHandler()" type="button" [disabled]="isDisabled() || isLoading()"
+    class="w-full flex justify-center items-center mb-5 bg-amber-500 hover:bg-amber-400 text-black rounded-md p-2 disabled:opacity-30 transition-colors font-semibold">
+    @if(isLoading())
+    {
+    <div class="w-4 h-4 border-2 mr-2 border-white border-t-transparent rounded-full inline-block animate-spin">
+
+    </div>
+    }
+    @if(isLoading()){
+    <span>
+
+        Processing...
+    </span>
+    }@else{
+    <span>
+
+        {{ text() }}
+    </span>
+    }
+
+</button>

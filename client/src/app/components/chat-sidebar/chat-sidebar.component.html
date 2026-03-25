@@ -1,0 +1,88 @@
+<div class="flex flex-col h-full">
+    <!-- User header -->
+    <div class="flex items-center justify-between bg-gray-900/95 backdrop-blur z-10 sticky top-0 px-4 py-3 border-b border-amber-500/20">
+        <div class="flex items-center gap-2">
+            <div class="relative">
+                <img class="h-9 w-9 rounded-full border-2 border-amber-400 object-cover"
+                    [src]="(authService.currentLoggedUser!.profileImage || 'assets/default-avatar.svg')"
+                    alt="Profile Picture">
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-amber-400 rounded-full ring-2 ring-gray-900 online-glow"></span>
+            </div>
+            <div class="font-semibold text-sm text-white">
+                {{authService.currentLoggedUser?.fullName | titlecase}}
+            </div>
+        </div>
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="text-zinc-400 hover:text-amber-400 transition-colors">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+            <button (click)="logout()" mat-menu-item>
+                <mat-icon>logout</mat-icon>
+                <span>Logout</span>
+            </button>
+        </mat-menu>
+    </div>
+
+    <!-- Search -->
+    <div class="px-4 pt-3 pb-2">
+        <div class="relative flex items-center">
+            <mat-icon class="absolute left-2.5 text-zinc-500 pointer-events-none" style="font-size:18px;width:18px;height:18px;line-height:18px">search</mat-icon>
+            <input
+                placeholder="Search people..."
+                type="text"
+                [ngModel]="searchQuery()"
+                (ngModelChange)="searchQuery.set($event)"
+                class="bg-zinc-800/80 focus:ring-1 focus:ring-amber-400 focus:outline-none w-full
+                       border border-zinc-700 py-2 pl-9 pr-3 text-white rounded-xl
+                       placeholder-zinc-500 text-sm transition-all" />
+        </div>
+    </div>
+
+    <!-- User list -->
+    <div class="flex-1 overflow-y-auto px-2 pb-2" style="scrollbar-width:thin;scrollbar-color:#3f3f46 transparent">
+        @for (user of visibleUsers(); track user.id) {
+        <div (click)="openChatWindow(user)"
+            class="flex items-center relative rounded-xl px-3 py-2.5 gap-3 cursor-pointer
+                   hover:bg-zinc-800/70 transition-all duration-150 group mb-0.5">
+
+            <!-- Avatar with online dot -->
+            <div class="relative flex-shrink-0">
+                <img [src]="user.profilePicture" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-700 group-hover:ring-amber-400/50 transition-all" alt="">
+                @if(user.isOnline){
+                <span class="absolute bottom-0 right-0 w-3 h-3 bg-amber-400 rounded-full ring-2 ring-gray-900 online-glow"></span>
+                }@else{
+                <span class="absolute bottom-0 right-0 w-3 h-3 bg-zinc-600 rounded-full ring-2 ring-gray-900"></span>
+                }
+            </div>
+
+            <!-- Name + status -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-white font-medium truncate">
+                        {{user!.fullName.split(" ")[0] | titlecase}}
+                    </span>
+                    @if(user.unreadCount > 0){
+                    <span class="flex-shrink-0 bg-amber-500 text-zinc-900 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
+                        {{user.unreadCount > 9 ? '9+' : user.unreadCount}}
+                    </span>
+                    }
+                </div>
+                @if(user!.isTyping){
+                <app-typing-indicator />
+                }@else if(!user.isOnline) {
+                <span class="text-xs text-zinc-600">offline</span>
+                }@else {
+                <span class="text-xs text-amber-400/70">online</span>
+                }
+            </div>
+        </div>
+        }
+
+        @if(visibleUsers().length === 0 && searchQuery().trim() === ''){
+        <div class="text-center text-zinc-600 text-xs mt-8 px-4 fade-up">
+            <mat-icon class="block mx-auto mb-2 text-zinc-700">search</mat-icon>
+            Search for someone to start chatting
+        </div>
+        }
+    </div>
+</div>

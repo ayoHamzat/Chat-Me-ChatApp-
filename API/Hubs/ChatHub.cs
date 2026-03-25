@@ -148,6 +148,8 @@ public class ChatHub(UserManager<AppUser> userManager, AppDbContext context) : H
 
         var onlineUsersSet = new HashSet<string>(onlineUsers.Keys);
 
+        var currentUserId = (await userManager.FindByNameAsync(username!))?.Id ?? "";
+
         var users = await userManager.Users.Select(u => new OnlineUserDto
         {
             Id = u.Id,
@@ -155,7 +157,10 @@ public class ChatHub(UserManager<AppUser> userManager, AppDbContext context) : H
             FullName = u.FullName,
             ProfilePicture = u.ProfileImage,
             IsOnline = onlineUsersSet.Contains(u.UserName!),
-            UnreadCount = context.Messages.Count(x => x.ReceiverId == username && x.SenderId == u.Id && !x.IsRead)
+            UnreadCount = context.Messages.Count(x => x.ReceiverId == currentUserId && x.SenderId == u.Id && !x.IsRead),
+            HasHistory = context.Messages.Any(x =>
+                (x.SenderId == currentUserId && x.ReceiverId == u.Id) ||
+                (x.SenderId == u.Id && x.ReceiverId == currentUserId))
         }).OrderByDescending(u => u.IsOnline)
         .ToListAsync();
 

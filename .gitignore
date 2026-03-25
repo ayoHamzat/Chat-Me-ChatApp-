@@ -1,0 +1,23 @@
+# Node
+node_modules/
+.angular/
+dist/
+
+# VS Code
+.vscode/
+
+# .NET
+bin/
+obj/
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
