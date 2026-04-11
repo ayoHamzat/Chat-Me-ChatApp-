@@ -59,6 +59,8 @@ export class ChatSidebarComponent implements OnInit {
   }
 
   openChatWindow(user: User) {
+    (document.activeElement as HTMLElement)?.blur();
+    this.searchQuery.set('');
     this.chattedUserIds.update(set => new Set([...set, user.id]));
     this.chatService.chatMessages.set([]);
     this.chatService.currentOpenedChat.set(user);
