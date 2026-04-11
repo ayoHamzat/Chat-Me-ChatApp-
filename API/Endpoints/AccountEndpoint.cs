@@ -38,8 +38,12 @@ public static class AccountEndpoint
 
             var picture = await FileUpload.Upload(profileImage);
 
-            var scheme = context.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? context.Request.Scheme;
-            picture = $"{scheme}://{context.Request.Host}/uploads/{picture}";
+            // Only prepend host for local development (Cloudinary returns full URL)
+            if (!picture.StartsWith("http"))
+            {
+                var scheme = context.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? context.Request.Scheme;
+                picture = $"{scheme}://{context.Request.Host}/uploads/{picture}";
+            }
 
             var user = new AppUser
             {
