@@ -38,7 +38,8 @@ public static class AccountEndpoint
 
             var picture = await FileUpload.Upload(profileImage);
 
-            picture = $"{context.Request.Scheme}://{context.Request.Host}/uploads/{picture}";
+            var scheme = context.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? context.Request.Scheme;
+            picture = $"{scheme}://{context.Request.Host}/uploads/{picture}";
 
             var user = new AppUser
             {
