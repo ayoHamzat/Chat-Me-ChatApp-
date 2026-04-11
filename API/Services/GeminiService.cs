@@ -11,9 +11,11 @@ public class GeminiService
     public GeminiService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
-        _apiKey = Environment.GetEnvironmentVariable("GeminiApiKey")
+        _apiKey = configuration["GeminiApiKey"]
+               ?? configuration["GEMINIAPI_KEY"]
+               ?? Environment.GetEnvironmentVariable("GeminiApiKey")
                ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY")
-               ?? configuration["GeminiApiKey"];
+               ?? Environment.GetEnvironmentVariable("GEMINIAPIKEY");
     }
 
     public async Task<string> GenerateReplyAsync(string userMessage)
