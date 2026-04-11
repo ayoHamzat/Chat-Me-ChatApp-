@@ -8,6 +8,8 @@ import {
   HubConnectionState,
 } from '@microsoft/signalr';
 import { Message } from '../models/message';
+import { Group } from '../models/group';
+import { GroupMessage } from '../models/group-message';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -43,6 +45,12 @@ export class ChatService {
   isLoading = signal<boolean>(true);
   autoScrollEnabled = signal<boolean>(true);
 
+  // Group chat state
+  userGroups = signal<Group[]>([]);
+  currentOpenedGroup = signal<Group | null>(null);
+  groupMessages = signal<GroupMessage[]>([]);
+  isGroupLoading = signal<boolean>(false);
+
   private hubConnection?: HubConnection;
 
   startConnection(token: string, senderId?: string) {
@@ -54,6 +62,10 @@ export class ChatService {
       this.hubConnection.off('OnlineUsers');
       this.hubConnection.off('NotifyTypingToUser');
       this.hubConnection.off('Notify');
+      this.hubConnection.off('UserGroups');
+      this.hubConnection.off('GroupCreated');
+      this.hubConnection.off('ReceiveGroupMessage');
+      this.hubConnection.off('ReceiveGroupMessageList');
     }
 
     this.hubConnection = new HubConnectionBuilder()
@@ -106,6 +118,39 @@ export class ChatService {
       document.title = 'NexChat — New Message';
       this.chatMessages.update((messages) => [...messages, message]);
     });
+
+    // Group chat handlers
+    this.hubConnection!.on('UserGroups', (groups: Group[]) => {
+      this.userGroups.set(groups);
+    });
+
+    this.hubConnection!.on('GroupCreated', (group: Group) => {
+      this.userGroups.update(groups => {
+        const exists = groups.some(g => g.id === group.id);
+        return exists ? groups : [...groups, group];
+      });
+    });
+
+    this.hubConnection!.on('ReceiveGroupMessage', (message: GroupMessage) => {
+      const audio = new Audio('assets/notification.mp3');
+      audio.play().catch(() => {});
+
+      if (this.currentOpenedGroup()?.id === message.groupId) {
+        this.groupMessages.update(messages => [...messages, message]);
+      } else {
+        this.userGroups.update(groups =>
+          groups.map(g => g.id === message.groupId
+            ? { ...g, unreadCount: g.unreadCount + 1 }
+            : g
+          )
+        );
+      }
+    });
+
+    this.hubConnection!.on('ReceiveGroupMessageList', (messages: GroupMessage[]) => {
+      this.groupMessages.update(existing => [...messages, ...existing]);
+      this.isGroupLoading.set(false);
+    });
   }
 
   disConnectConnection() {
@@ -138,6 +183,55 @@ export class ChatService {
     this.hubConnection
       ?.invoke('SendMessage', { receiverId: currentChat.id, content: message })
       .catch(() => {});
+  }
+
+  sendGroupMessage(message: string) {
+    const group = this.currentOpenedGroup();
+    if (!group) return;
+
+    const currentUser = this.authService.currentLoggedUser!;
+    this.groupMessages.update(messages => [
+      ...messages,
+      {
+        id: 0,
+        groupId: group.id,
+        senderId: currentUser.id,
+        senderName: currentUser.fullName,
+        senderProfilePicture: currentUser.profileImage,
+        content: message,
+        createdDate: new Date().toString(),
+        isRead: true,
+      } as GroupMessage,
+    ]);
+
+    this.hubConnection
+      ?.invoke('SendGroupMessage', group.id, message)
+      .catch(() => {});
+  }
+
+  createGroup(name: string, memberIds: string[]): Promise<void> {
+    return this.hubConnection
+      ?.invoke('CreateGroup', { name, memberIds })
+      ?? Promise.reject('Not connected');
+  }
+
+  openGroupChat(group: Group) {
+    this.currentOpenedChat.set(null);
+    this.currentOpenedGroup.set({ ...group, unreadCount: 0 });
+    this.groupMessages.set([]);
+    this.userGroups.update(groups =>
+      groups.map(g => g.id === group.id ? { ...g, unreadCount: 0 } : g)
+    );
+    this.loadGroupMessages(1);
+  }
+
+  loadGroupMessages(pageNumber: number) {
+    const group = this.currentOpenedGroup();
+    if (!group) return;
+    this.isGroupLoading.set(true);
+    this.hubConnection
+      ?.invoke('LoadGroupMessages', group.id, pageNumber)
+      .catch(() => { this.isGroupLoading.set(false); });
   }
 
   private sendAiMessage(message: string) {

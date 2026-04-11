@@ -48,6 +48,13 @@ export class ChatWindowComponent {
     const userMessage = this.message.trim();
     if (!userMessage) return;
 
+    if (this.chatService.currentOpenedGroup()) {
+      this.chatService.sendGroupMessage(userMessage);
+      this.message = '';
+      this.showEmojiPicker.set(false);
+      return;
+    }
+
     this.chatService.sendMessage(userMessage);
     this.message = '';
     this.showEmojiPicker.set(false);

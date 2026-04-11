@@ -66,7 +66,63 @@
         </button>
     </div>
 </div>
-}@else {
+} @else if(chatService.currentOpenedGroup()) {
+<!-- Group Chat Window -->
+<div class="flex flex-col w-full bg-zinc-950 h-full">
+    <!-- Group Header -->
+    <div class="flex items-center border-b border-amber-500/20 w-full bg-gray-900/95 backdrop-blur px-4 py-3 flex-shrink-0 gap-3">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0 ring-2 ring-amber-400/50">
+            <mat-icon class="text-zinc-900" style="font-size:18px;width:18px;height:18px;line-height:18px">group</mat-icon>
+        </div>
+        <div>
+            <span class="font-semibold text-white text-sm leading-tight block">
+                {{chatService.currentOpenedGroup()?.name}}
+            </span>
+            <span class="text-zinc-400 text-xs">
+                {{chatService.currentOpenedGroup()?.memberIds?.length}} members
+            </span>
+        </div>
+    </div>
+
+    <!-- Group Messages -->
+    <div class="flex-1 overflow-hidden">
+        <app-chat-box [isGroup]="true" />
+    </div>
+
+    <!-- Input Bar -->
+    <div class="flex items-center gap-2 border-t border-amber-500/20 w-full bg-gray-900/95 backdrop-blur px-4 py-3 flex-shrink-0">
+        <div class="relative flex-shrink-0">
+            <button (click)="toggleEmojiPicker()"
+                class="text-zinc-400 hover:text-amber-400 transition-colors p-1 rounded-full hover:bg-zinc-800 flex items-center justify-center">
+                <mat-icon style="font-size:20px;width:20px;height:20px;line-height:20px">emoji_emotions</mat-icon>
+            </button>
+            @if(showEmojiPicker()) {
+            <div class="absolute bottom-12 left-0 bg-zinc-900 border border-zinc-700/80 rounded-2xl p-3 shadow-2xl w-72 z-50 fade-up">
+                <div class="grid grid-cols-9 gap-0.5 max-h-44 overflow-y-auto">
+                    @for(emoji of emojis; track emoji) {
+                    <button (click)="insertEmoji(emoji)"
+                        class="text-lg p-1.5 rounded-lg hover:bg-zinc-700 transition-colors leading-none cursor-pointer">
+                        {{emoji}}
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+
+        <input type="text"
+            (keydown.enter)="sendMessage()"
+            [(ngModel)]="message"
+            class="flex-1 bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-400/60 text-white border border-zinc-700 rounded-full px-5 py-2 text-sm placeholder-zinc-500 transition-all"
+            placeholder="Message group..." />
+
+        <button (click)="sendMessage()"
+            class="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-400 transition-all transform hover:scale-110 active:scale-95 shadow-lg text-zinc-900 cursor-pointer">
+            <mat-icon style="font-size:18px;width:18px;height:18px;line-height:18px">send</mat-icon>
+        </button>
+    </div>
+</div>
+} @else {
 <div class="flex flex-col items-center justify-center p-4 md:h-full bg-zinc-950 gap-3 fade-up">
     <img src="chatopen.svg" class="opacity-20 max-w-48" />
     <p class="text-zinc-500 text-sm">Select a conversation to start chatting</p>

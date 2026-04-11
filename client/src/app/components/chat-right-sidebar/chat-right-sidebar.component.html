@@ -47,4 +47,36 @@
     </div>
     }
 </div>
+} @else if(chatService.currentOpenedGroup()) {
+<!-- Group info panel -->
+<div class="flex flex-col items-center px-4 py-6 h-full fade-up overflow-y-auto">
+    <!-- Group avatar -->
+    <div class="mb-4 w-28 h-28 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+        <mat-icon class="text-zinc-900" style="font-size:52px;width:52px;height:52px;line-height:52px">group</mat-icon>
+    </div>
+
+    <!-- Group name -->
+    <h2 class="text-base font-bold text-white text-center leading-tight">
+        {{chatService.currentOpenedGroup()?.name}}
+    </h2>
+    <p class="text-xs text-zinc-500 mt-0.5">{{chatService.currentOpenedGroup()?.memberIds?.length}} members</p>
+
+    <!-- Divider -->
+    <div class="w-full border-t border-zinc-800/80 my-5"></div>
+
+    <!-- Members list -->
+    <div class="w-full">
+        <p class="text-xs text-zinc-400 font-semibold mb-3 uppercase tracking-wider">Members</p>
+        <div class="space-y-2">
+            @for(name of chatService.currentOpenedGroup()?.memberNames; track name) {
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-zinc-700 ring-2 ring-zinc-600 flex items-center justify-center flex-shrink-0">
+                    <mat-icon style="font-size:16px;width:16px;height:16px;line-height:16px" class="text-zinc-400">person</mat-icon>
+                </div>
+                <span class="text-sm text-zinc-300 truncate">{{name | titlecase}}</span>
+            </div>
+            }
+        </div>
+    </div>
+</div>
 }

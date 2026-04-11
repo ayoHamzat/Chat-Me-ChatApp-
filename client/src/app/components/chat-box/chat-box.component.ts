@@ -3,8 +3,8 @@ import {
   Component,
   ElementRef,
   inject,
+  Input,
   ViewChild,
-  viewChild,
 } from '@angular/core';
 import { ChatService } from '../../services/chat.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -36,6 +36,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ChatBoxComponent implements AfterViewChecked {
   @ViewChild('chatBox', { read: ElementRef }) public chatBox?: ElementRef;
+  @Input() isGroup = false;
 
   chatService = inject(ChatService);
   authService = inject(AuthService);
@@ -43,7 +44,11 @@ export class ChatBoxComponent implements AfterViewChecked {
 
   loadMoreMessage() {
     this.pageNumber++;
-    this.chatService.loadMessages(this.pageNumber);
+    if (this.isGroup) {
+      this.chatService.loadGroupMessages(this.pageNumber);
+    } else {
+      this.chatService.loadMessages(this.pageNumber);
+    }
     this.scrollTop();
   }
 

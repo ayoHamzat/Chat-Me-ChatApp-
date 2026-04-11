@@ -13,4 +13,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     }
 
     public DbSet<Message> Messages { get; set; }
+    public DbSet<ChatGroup> ChatGroups { get; set; }
+    public DbSet<GroupMember> GroupMembers { get; set; }
+    public DbSet<GroupMessage> GroupMessages { get; set; }
 }
