@@ -29,17 +29,28 @@ builder.Services.AddCors(options =>
 
 var JwtSetting = builder.Configuration.GetSection("JWTSetting");
 
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
-    ?? builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Data Source=chat.db";
+var rawConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-if (connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
+if (!string.IsNullOrEmpty(rawConnectionString) &&
+    (rawConnectionString.StartsWith("postgresql://") || rawConnectionString.StartsWith("postgres://")))
 {
-    builder.Services.AddDbContext<AppDbContext>(x => x.UseNpgsql(connectionString));
+    var uri = new Uri(rawConnectionString);
+    var userInfo = uri.UserInfo.Split(':');
+    var npgsqlConn = new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port > 0 ? uri.Port : 5432,
+        Database = uri.AbsolutePath.TrimStart('/'),
+        Username = userInfo[0],
+        Password = userInfo.Length > 1 ? userInfo[1] : "",
+        SslMode = Npgsql.SslMode.Require
+    };
+    builder.Services.AddDbContext<AppDbContext>(x => x.UseNpgsql(npgsqlConn.ConnectionString));
 }
 else
 {
-    builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlite(connectionString));
+    builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlite(rawConnectionString ?? "Data Source=chat.db"));
 }
 
 builder.Services.AddIdentityCore<AppUser>()
