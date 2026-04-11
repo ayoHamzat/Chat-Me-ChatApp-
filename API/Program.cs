@@ -24,7 +24,18 @@ builder.Services.AddCors(options =>
 
 var JwtSetting = builder.Configuration.GetSection("JWTSetting");
 
-builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlite("Data Source=chat.db"));
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Data Source=chat.db";
+
+if (connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
+{
+    builder.Services.AddDbContext<AppDbContext>(x => x.UseNpgsql(connectionString));
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlite(connectionString));
+}
 
 builder.Services.AddIdentityCore<AppUser>()
     .AddEntityFrameworkStores<AppDbContext>()
