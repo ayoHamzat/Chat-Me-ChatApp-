@@ -46,11 +46,15 @@ if (!string.IsNullOrEmpty(rawConnectionString) &&
         Password = userInfo.Length > 1 ? userInfo[1] : "",
         SslMode = Npgsql.SslMode.Require
     };
-    builder.Services.AddDbContext<AppDbContext>(x => x.UseNpgsql(npgsqlConn.ConnectionString));
+    builder.Services.AddDbContext<AppDbContext>(x => x
+        .UseNpgsql(npgsqlConn.ConnectionString)
+        .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
 }
 else
 {
-    builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlite(rawConnectionString ?? "Data Source=chat.db"));
+    builder.Services.AddDbContext<AppDbContext>(x => x
+        .UseSqlite(rawConnectionString ?? "Data Source=chat.db")
+        .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
 }
 
 builder.Services.AddIdentityCore<AppUser>()
