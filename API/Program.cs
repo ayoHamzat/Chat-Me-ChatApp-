@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
 
 var allowedOrigins = new List<string> { "http://localhost:4200", "https://localhost:4200" };
 var extraOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS");
