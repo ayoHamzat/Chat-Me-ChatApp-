@@ -129,6 +129,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
 
+app.MapGet("/debug/config", (IConfiguration config) => new {
+    GeminiApiKey = string.IsNullOrEmpty(config["GeminiApiKey"]) ? "NOT FOUND" : "FOUND",
+    EnvVar = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GeminiApiKey")) ? "NOT FOUND" : "FOUND"
+});
+
 app.MapHub<ChatHub>("hubs/chat");
 app.MapHub<VideChatHub>("hubs/video-chat");
 app.MapAccountEndpoint();
