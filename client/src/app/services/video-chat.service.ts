@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
 })
 export class VideoChatService {
 
-  private hubUrl = `${environment.baseUrl}/hubs/video`;
+  private hubUrl = `${environment.baseUrl}/hubs/video-chat`;
   public hubConnection!:HubConnection;
 
   public incomingCall = false;
