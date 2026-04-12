@@ -67,7 +67,7 @@
     <!-- Direct user list -->
     <div class="flex-1 overflow-y-auto px-2 pb-2" style="scrollbar-width:thin;scrollbar-color:#3f3f46 transparent">
         @for (user of visibleUsers(); track user.id) {
-        <div (click)="openChatWindow(user)" (touchend)="openChatWindow(user)"
+        <div (click)="openChatWindow(user)"
             class="flex items-center relative rounded-xl px-3 py-2.5 gap-3 cursor-pointer
                    hover:bg-zinc-800/70 transition-all duration-150 group mb-0.5 select-none"
             [class.bg-zinc-800]="chatService.currentOpenedChat()?.id === user.id">

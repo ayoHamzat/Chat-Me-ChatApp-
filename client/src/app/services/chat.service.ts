@@ -107,9 +107,8 @@ export class ChatService {
     });
 
     this.hubConnection!.on('ReceiveMessageList', (message) => {
-      this.isLoading.update(() => true);
-      this.chatMessages.update((messages) => [...message, ...messages]);
-      this.isLoading.update(() => false);
+      this.chatMessages.set(message);
+      this.isLoading.set(false);
     });
 
     this.hubConnection!.on('ReceiveNewMessage', (message: Message) => {
