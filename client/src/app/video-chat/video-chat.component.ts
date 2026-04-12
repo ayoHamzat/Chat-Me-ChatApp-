@@ -79,34 +79,35 @@ export class VideoChatComponent implements OnInit {
 
 
   private peerConnection!:RTCPeerConnection;
+  private localStreamReady!:Promise<void>;
   signalRService = inject(VideoChatService);
   private dialogRef : MatDialogRef<VideoChatComponent> = inject(MatDialogRef);
 
 
     ngOnInit(): void {
       this.setupPeerConnection();
-      this.startLocalVideo();
-      this.signalRService.startConnection();
+      this.localStreamReady = this.startLocalVideo();
       this.setupSignalListers();
     }
 
     setupSignalListers(){
-      this.signalRService.hubConnection.on('CallEnded',()=>{
-        // task tod endCall();
-      })
+      this.signalRService.hubConnection.on('CallEnded', () => {
+        this.endCall();
+      });
 
-      this.signalRService.answerReceived.subscribe(async(data)=>{
-        if(data){
+      this.signalRService.answerReceived.subscribe(async (data) => {
+        if (data && this.peerConnection.signalingState !== 'stable') {
           await this.peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
         }
       });
 
-      this.signalRService.iceCandidateReceived.subscribe(async(data)=>{
-        if(data){
-          await this.peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+      this.signalRService.iceCandidateReceived.subscribe(async (data) => {
+        if (data) {
+          try {
+            await this.peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+          } catch(e) {}
         }
-      })
-
+      });
     }
 
     declineCall(){
@@ -120,23 +121,24 @@ export class VideoChatComponent implements OnInit {
       this.signalRService.incomingCall  = false;
       this.signalRService.isCallActive = true;
 
-      let offer = await this.signalRService.offerReceived.getValue()?.offer;
+      await this.localStreamReady;
+
+      const offer = this.signalRService.offerReceived.getValue()?.offer;
 
       if(offer){
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-
-        let answer = await this.peerConnection.createAnswer();
+        const answer = await this.peerConnection.createAnswer();
         await this.peerConnection.setLocalDescription(answer);
-        this.signalRService.sendAnswer(this.signalRService.remoteUserId,answer);
+        this.signalRService.sendAnswer(this.signalRService.remoteUserId, answer);
       }
     }
 
     async startCall(){
+      await this.localStreamReady;
       this.signalRService.isCallActive = true;
-      let offer = await this.peerConnection.createOffer();
-
+      const offer = await this.peerConnection.createOffer();
       await this.peerConnection.setLocalDescription(offer);
-      this.signalRService.sendOffer(this.signalRService.remoteUserId,offer);
+      this.signalRService.sendOffer(this.signalRService.remoteUserId, offer);
     }
 
     setupPeerConnection(){
@@ -173,16 +175,14 @@ export class VideoChatComponent implements OnInit {
       }
     }
 
-    async startLocalVideo(){
+    async startLocalVideo(): Promise<void> {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video:true,
-        audio:true,
+        video: true,
+        audio: true,
       });
 
       this.localVideo.nativeElement.srcObject = stream;
-
-      stream.getTracks()
-      .forEach((track)=>this.peerConnection.addTrack(track,stream));
+      stream.getTracks().forEach(track => this.peerConnection.addTrack(track, stream));
     }
 
     async endCall(){
